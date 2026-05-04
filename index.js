@@ -32,7 +32,7 @@ async function run () {
              const bidsCollection = db.collection('dids')
              const usersCollection = db.collection('users');
               
-              
+            //----------------Users API ------------
              app.post('/users', async(req, res) => {
                  const newUser =req.body;
                  console.log(newUser);
@@ -50,7 +50,7 @@ async function run () {
                 const result = await usersCollection.insertOne(newUser);
                 res.send(result);
              })
-
+    //--------------Products API ---------
              app.get('/products', async(req, res) => {
                 // const projectFields = { title: 1, pric_min: 1, price_max: 1 }
                 // const cursor = productsCollection.find().sort({price_min: 1}).limit(5)
@@ -67,6 +67,13 @@ async function run () {
                 const result = await cursor.toArray();
                 res.send(result)
              })
+             
+             app.get('/latest-products',async(req, res) => {
+                const cursor = productsCollection.find().sort({created_at: -1}).limit(6);
+                const result = await cursor.toArray();
+                res.send(result);
+             })
+
              app.get('/products/:id', async(req, res) => {
                 const id = req.params.id;
                 const query = { _id: new ObjectId(id)}
@@ -114,6 +121,26 @@ async function run () {
                 res.send(result); 
             })
             
+                app.get('products/bids/:productId', async(req, res) => {
+                    const productId = req.params.productId;
+                    const query = { product: productId}
+                    const cursor = bidsCollection.find(query).sort({bid_price: -1})
+                    const result = await cursor.toArray();
+                    res.send(result)
+                })
+
+                app.get('/bids', async(req, res) => {
+                   
+                    const query = {};
+                    if(query.email) {
+                        query.email = email;
+                    }
+
+                    const cursor = bidsCollection.find(query);
+                    const result = await cursor.toArray();
+                    res.send(result);
+                })
+
              app.post('/bids', async(req, res) => {
                 const newBid = req.body;
                 const result = await bidsCollection.insertOne(newBid);
